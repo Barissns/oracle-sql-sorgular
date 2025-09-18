@@ -1,169 +1,212 @@
 --------------- SELECT – WHERE – ORDER BY ---------------
--- Tüm çalışanların ad ve soyadlarını listele
+
+-- Bu sorgu, tüm çalışanların ad ve soyadlarını listeler.
+-- SELECT ile sütunları seçiyoruz, FROM ile tabloyu belirtiyoruz.
 SELECT first_name, last_name 
 FROM hr.employees;
 
--- Maaşı 10000’den fazla olan çalışanları getir
+-- Bu sorgu, maaşı 10.000’den fazla olan çalışanları getirir.
+-- WHERE ile filtreleme yapıyoruz, sadece salary > 10000 olanlar gelir.
 SELECT first_name, salary 
 FROM hr.employees 
 WHERE salary > 10000;
 
--- Çalışanları işe giriş tarihine göre sıralayarak listele
+-- Bu sorgu, çalışanları işe giriş tarihine göre sıralar.
+-- ORDER BY hire_date ASC → en eski işe girenler en üstte olur.
 SELECT first_name, hire_date 
 FROM hr.employees 
 ORDER BY hire_date ASC;
 
--- Maaşı 10.000'den fazla olan çalışanların adlarını ve maaşlarını getir
+-- Bu sorgu, maaşı 10.000’den fazla olan çalışanları maaşlarına göre azalan şekilde sıralar.
+-- ORDER BY salary DESC → en yüksek maaş en üstte olur.
 SELECT first_name, salary 
 FROM hr.employees 
 WHERE salary > 10000
-order by salary desc;
+ORDER BY salary DESC;
 
--- deprtmen_id 'si 20, 30 veya 40 olan çalışanları bul 
-select first_name,last_name, department_id
-from hr.employees
-where department_id in (20,30,40)
-order by department_id
+-- Bu sorgu, departman ID’si 20, 30 veya 40 olan çalışanları listeler.
+-- WHERE IN (...) ifadesiyle birden fazla değeri filtreleyebiliriz.
+-- ORDER BY department_id → departmanlara göre sıralama yapılır.
+SELECT first_name, last_name, department_id
+FROM hr.employees
+WHERE department_id IN (20, 30, 40)
+ORDER BY 
 
 --------------- Fonksiyonlar (String, Sayısal, Tarih) ---------------
--- Ad ve soyadı birleştirerek tam isim göster
-SELECT first_name || ' ' || last_name AS full_name FROM hr.employees;
 
--- Concat ile birleştirme
-SELECT CONCAT(first_name, last_name) FROM hr.employees;
+-- Bu sorgu, çalışanların ad ve soyadlarını birleştirerek tam isim oluşturur.
+-- || operatörü ile string birleştirme yapılır.
+SELECT first_name || ' ' || last_name AS full_name 
+FROM hr.employees;
 
--- lower hepsini küçük olarak getiriyor.
-select upper (FIRST_NAME), upper(last_name)
-from hr.employees
+-- Bu sorgu, CONCAT fonksiyonu ile ad ve soyadı birleştirir.
+-- CONCAT sadece iki string alır, boşluk eklemek için ayrı bir CONCAT gerekebilir.
+SELECT CONCAT(first_name, last_name) 
+FROM hr.employees;
 
--- mod alma
-select Mod(salary, 500) 
-from hr.employees
+-- Bu sorgu, çalışanların ad ve soyadlarını büyük harfe çevirir.
+-- UPPER fonksiyonu string ifadeleri büyük harfe dönüştürür.
+SELECT UPPER(first_name), UPPER(last_name)
+FROM hr.employees;
 
--- Maaşın %25 zamlı halini göster
+-- Bu sorgu, maaşların 500’e bölümünden kalanı verir.
+-- MOD fonksiyonu sayısal işlemlerde kalan hesaplamak için kullanılır.
+SELECT MOD(salary, 500) 
+FROM hr.employees;
+
+-- Bu sorgu, çalışanların maaşına %25 zam eklenmiş halini gösterir.
+-- Sayısal işlemler doğrudan SELECT içinde yapılabilir.
 SELECT salary, salary * 1.25 AS increased_salary 
 FROM hr.employees;
 
--- İşe giriş tarihinden bu yana geçen gün sayısını hesapla
+-- Bu sorgu, çalışanların işe giriş tarihinden bugüne kadar geçen gün sayısını hesaplar.
+-- SYSDATE bugünün tarihini verir, DATE farkı gün cinsinden hesaplanır.
 SELECT first_name, SYSDATE - hire_date AS days_worked 
 FROM hr.employees;
 
--- 1999-01-01 tarihinden sonra işe başlayanları göster.
-SELECT FIRST_NAME, LAST_NAME, HIRE_DATE 
-FROM HR.EMPLOYEES 
-WHERE HIRE_DATE > DATE '1999-01-01';
+-- Bu sorgu, 1999-01-01 tarihinden sonra işe başlayan çalışanları listeler.
+-- DATE 'YYYY-MM-DD' formatı ile sabit tarih karşılaştırması yapılır.
+SELECT first_name, last_name, hire_date 
+FROM hr.employees 
+WHERE hire_date > DATE '1999-01-01';
 
--- Bugünün tarhi (dual)
+-- Bu sorgu, bugünün tarihini DD-MM-YYYY formatında gösterir.
+-- DUAL tablosu Oracle’da tek satırlık işlemler için kullanılır.
 SELECT TO_CHAR(SYSDATE, 'DD-MM-YYYY') AS today_date 
 FROM DUAL;
 
 --------------- GROUP BY, HAVING ve Toplama Fonksiyonları ---------------
--- Departmanlara göre ortalama maaşları göster
+
+-- Bu sorgu, her departmanın ortalama maaşını hesaplar.
+-- AVG(salary) ile ortalama alınır, GROUP BY ile departman bazında gruplama yapılır.
 SELECT department_id, AVG(salary) AS avg_salary
 FROM hr.employees
 GROUP BY department_id;
 
--- Departmanlara göre çalışan sayısını göster
+-- Bu sorgu, her departmanda kaç çalışan olduğunu gösterir.
+-- COUNT(*) ile toplam kişi sayısı alınır, GROUP BY ile departmanlara göre ayrılır.
 SELECT department_id, COUNT(*) AS employee_count
 FROM hr.employees
 GROUP BY department_id;
 
--- Sadece 8’ten fazla çalışanı olan departmanları listele
+-- Bu sorgu, sadece 8’den fazla çalışanı olan departmanları listeler.
+-- HAVING COUNT(*) > 8 → gruplama sonrası filtreleme yapılır.
 SELECT department_id, COUNT(*) AS employee_count
 FROM hr.employees
 GROUP BY department_id
 HAVING COUNT(*) > 8;
 
--- ortalama maaşı 777 den büyük olan iş pozisyonlarını getir.
-select job_id, avg(salary) as avg_salary
-from hr.employees
-group by job_id
-having avg(salary) > 777
+-- Bu sorgu, ortalama maaşı 777’den büyük olan iş pozisyonlarını getirir.
+-- GROUP BY job_id → pozisyona göre gruplama, HAVING ile filtreleme yapılır.
+SELECT job_id, AVG(salary) AS avg_salary
+FROM hr.employees
+GROUP BY job_id
+HAVING AVG(salary) > 777;
 
--- yıl ve departmana göre işe alım sayısını göster
-select extract(year from hire_date) as hire_year,
-department_id,
-count(*) as hires
-from hr.employees
-group by extract(year from hire_date), department_id 
-order by hire_year, department_id
+-- Bu sorgu, yıl ve departmana göre işe alım sayısını gösterir.
+-- EXTRACT(year from hire_date) → işe alım yılını çıkarır.
+-- GROUP BY ile yıl ve departman bazında gruplama yapılır.
+-- ORDER BY ile sıralama yapılır.
+SELECT EXTRACT(YEAR FROM hire_date) AS hire_year,
+       department_id,
+       COUNT(*) AS hires
+FROM hr.employees
+GROUP BY EXTRACT(YEAR FROM hire_date), department_id 
+ORDER BY hire_year, department_id;
 
 --------------- JOIN’ler (Çoklu Tablo İşlemleri) ---------------
-/* İsveç'de ( Sweden ) çalışan personellerin isimlerini ve şehirlerini listeleyin. */
-select e.first_name, e.last_name, l.city
-from hr.EMPLOYEES e
-inner join hr.departments d on e.department_id = d.department_id 
-inner join hr.locations l on d.location_id = l.location_id
-inner join hr.countries c on l.country_id = c.country_id
-where c.country_name = 'Sweden'
 
-/* Maaşı 7.750'den fazla olan çalışanların isimlerini, maaşlarını ve iş ünvanlarını (job_title) gösterin */
-select e.first_name, e.last_name, e.salary, j.job_title
-from hr.EMPLOYEES e
-inner join hr.JOBS j 
-on e.job_id = j.job_id
-where e.salary > 7750
+-- Bu sorgu, İsveç'te çalışan personellerin ad, soyad ve şehir bilgilerini listeler.
+-- employees → departments → locations → countries tabloları INNER JOIN ile bağlanır.
+-- WHERE ile sadece country_name = 'Sweden' olanlar filtrelenir.
+SELECT e.first_name, e.last_name, l.city
+FROM hr.employees e
+INNER JOIN hr.departments d ON e.department_id = d.department_id 
+INNER JOIN hr.locations l ON d.location_id = l.location_id
+INNER JOIN hr.countries c ON l.country_id = c.country_id
+WHERE c.country_name = 'Sweden';
 
-/* Hangi departmanlarda hiç çalışan yoktur? Bu departmanları listeleyin */
-select d.department_name
-from hr.DEPARTMENTS d 
-left join hr.EMPLOYEES e
-on d.DEPARTMENT_ID = e. DEPARTMENT_ID
-where e.employee_id is null
+-- Bu sorgu, maaşı 7750’den fazla olan çalışanların ad, soyad, maaş ve iş unvanlarını gösterir.
+-- employees tablosu jobs tablosuyla INNER JOIN ile bağlanır.
+SELECT e.first_name, e.last_name, e.salary, j.job_title
+FROM hr.employees e
+INNER JOIN hr.jobs j ON e.job_id = j.job_id
+WHERE e.salary > 7750;
 
--- Right Outer Join
-select e.first_name, e.last_name, d.department_name
-from hr.EMPLOYEES e
-Right Join hr.DEPARTMENTS d 
-On e.DEPARTMENT_ID = d.DEPARTMENT_ID
+-- Bu sorgu, hiç çalışanı olmayan departmanları listeler.
+-- LEFT JOIN ile tüm departmanlar alınır, çalışanı olmayanlar NULL olur.
+-- WHERE e.employee_id IS NULL → çalışanı olmayanları filtreler.
+SELECT d.department_name
+FROM hr.departments d 
+LEFT JOIN hr.employees e ON d.department_id = e.department_id
+WHERE e.employee_id IS NULL;
 
--- Full Join 
-select e.first_name,e.last_name,d.department_name
-from hr.EMPLOYEES e
-full Outer Join hr.DEPARTMENTS d
-on e.DEPARTMENT_ID = d.DEPARTMENT_ID
+-- Bu sorgu, çalışanları ve departman adlarını RIGHT JOIN ile eşleştirir.
+-- RIGHT JOIN → tüm departmanlar alınır, çalışanı olmayanlar da görünür.
+SELECT e.first_name, e.last_name, d.department_name
+FROM hr.employees e
+RIGHT JOIN hr.departments d ON e.department_id = d.department_id;
 
--- Cross Join
-select e.first_name, e.last_name,d.department_name
-from hr.EMPLOYEES e
-cross join hr.DEPARTMENTS d
+-- Bu sorgu, çalışanlar ve departmanlar arasında FULL OUTER JOIN yapar.
+-- FULL JOIN → hem çalışanı olmayan departmanlar hem de departmanı olmayan çalışanlar görünür.
+SELECT e.first_name, e.last_name, d.department_name
+FROM hr.employees e
+FULL OUTER JOIN hr.departments d ON e.department_id = d.department_id;
 
--- Self Join
-select e.first_name as EMPLOYEE_NAME,
-    m.first_name as MANAGER_NAME
-from hr.EMPLOYEES e
-left join hr.EMPLOYEES m
-on e.manager_id = m.employee_id
+-- Bu sorgu, CROSS JOIN ile her çalışanı her departmanla eşleştirir.
+-- CROSS JOIN → kartesyen çarpım, toplam satır sayısı = çalışan × departman sayısı.
+SELECT e.first_name, e.last_name, d.department_name
+FROM hr.employees e
+CROSS JOIN hr.departments d;
 
---------------- Alt Sorgular (Subqueries)  ---------------
--- En yüksek maaşı alan çalışanı getir
+-- Bu sorgu, çalışanların yöneticilerini gösterir.
+-- SELF JOIN → aynı tablo kendisiyle bağlanır.
+-- manager_id → employee_id eşleştirilerek çalışan ve yöneticisi eşleştirilir.
+SELECT e.first_name AS employee_name,
+       m.first_name AS manager_name
+FROM hr.employees e
+LEFT JOIN hr.employees m ON e.manager_id = m.employee_id;
+
+--------------- Alt Sorgular (Subqueries) ---------------
+
+-- Bu sorgu, en yüksek maaşı alan çalışanı getirir.
+-- İçteki alt sorgu MAX(salary) ile en yüksek maaşı bulur.
+-- Dış sorgu, bu maaşa sahip olan çalışanı listeler.
 SELECT first_name, salary
 FROM hr.employees
 WHERE salary = (SELECT MAX(salary) FROM hr.employees);
 
--- Ortalama maaştan fazla kazanan çalışanlar
+-- Bu sorgu, ortalama maaştan fazla kazanan çalışanları listeler.
+-- Alt sorgu AVG(salary) ile ortalama maaşı hesaplar.
+-- Dış sorgu, bu değerden yüksek maaş alanları filtreler.
 SELECT first_name, salary
 FROM hr.employees
 WHERE salary > (SELECT AVG(salary) FROM hr.employees);
 
--- IT departmanındaki çalışanlar
+-- Bu sorgu, IT departmanındaki çalışanları listeler.
+-- Alt sorgu, 'IT' adlı departmanın ID’sini bulur.
+-- Dış sorgu, bu ID’ye sahip çalışanları getirir.
 SELECT first_name
 FROM hr.employees
 WHERE department_id = (
   SELECT department_id FROM hr.departments WHERE department_name = 'IT'
 );
 
-/* Belirli bir departmanın ortalama maaşından fazla kazanan kişileri bulan sorguyu yazın. (10) */
-select first_name, last_name, salary, department_id
-from hr.employees
-where salary > (
-    select Avg(salary)
-    from hr.employees
-    where department_id = 10
-)
+-- Bu sorgu, departman ID’si 10 olan birimin ortalama maaşından fazla kazanan çalışanları listeler.
+-- Alt sorgu, sadece departman 10 için AVG(salary) hesaplar.
+-- Dış sorgu, bu değerden yüksek maaş alanları filtreler.
+SELECT first_name, last_name, salary, department_id
+FROM hr.employees
+WHERE salary > (
+    SELECT AVG(salary)
+    FROM hr.employees
+    WHERE department_id = 10
+);
 
---------------- UNION – UNION ALL, CTE (WITH)  ---------------
--- IT ve Finance departmanlarındaki çalışanlar (UNION ile)
+--------------- UNION – UNION ALL, CTE (WITH) ---------------
+
+-- Bu sorgu, IT (60) ve Finance (100) departmanlarındaki çalışanları birleştirir.
+-- UNION → aynı sütun yapısına sahip iki sorgunun sonucunu birleştirir, tekrarları kaldırır.
 SELECT first_name 
 FROM hr.employees 
 WHERE department_id = 60
@@ -172,116 +215,150 @@ SELECT first_name
 FROM hr.employees 
 WHERE department_id = 100;
 
--- Yüksek maaşlı çalışanlar ve yöneticileri birleştir
-select first_name, last_name, 'Yüksek Maaşlı' as Category, salary
-from hr.employees
-where salary > 10000
-Union
-select first_name, last_name, 'Manager' as Category ,salary
-from hr.employees
-where employee_id In (
-    select distinct manager_id 
-    from hr.employees 
-where manager_id is not null)
+-- Bu sorgu, maaşı 10.000’den fazla olan çalışanlar ile yöneticileri tek listede birleştirir.
+-- UNION ile iki farklı sorgu birleştirilir, 'Category' sütunu ile gruplar etiketlenir.
+-- Alt sorgu ile yöneticilerin ID’leri alınır.
+SELECT first_name, last_name, 'Yüksek Maaşlı' AS Category, salary
+FROM hr.employees
+WHERE salary > 10000
+UNION
+SELECT first_name, last_name, 'Manager' AS Category, salary
+FROM hr.employees
+WHERE employee_id IN (
+    SELECT DISTINCT manager_id 
+    FROM hr.employees 
+    WHERE manager_id IS NOT NULL
+);
 
--- Aynı sorgu ama tekrarları da gösterir (UNION ALL)
-SELECT first_name FROM hr.employees WHERE department_id = 60
+-- Bu sorgu, IT ve Finance departmanlarındaki çalışanları tekrarları da dahil ederek birleştirir.
+-- UNION ALL → UNION’dan farklı olarak tekrarları kaldırmaz.
+SELECT first_name 
+FROM hr.employees 
+WHERE department_id = 60
 UNION ALL
-SELECT first_name FROM hr.employees WHERE department_id = 100;
+SELECT first_name 
+FROM hr.employees 
+WHERE department_id = 100;
 
--- Basit CTE
+-- Bu sorgu, CTE (Common Table Expression) kullanarak yüksek maaşlı çalışanları departman bazında sayar.
+-- WITH ile geçici bir tablo (HIGH_EARNERS) tanımlanır.
+-- Bu tablo JOIN ile departmanlara bağlanır ve COUNT ile kişi sayısı hesaplanır.
 WITH HIGH_EARNERS AS (
-    SELECT FIRST_NAME, LAST_NAME, SALARY, DEPARTMENT_ID
-    FROM HR.EMPLOYEES
-    WHERE SALARY > (SELECT AVG(SALARY) FROM HR.EMPLOYEES)
+    SELECT first_name, last_name, salary, department_id
+    FROM hr.employees
+    WHERE salary > (SELECT AVG(salary) FROM hr.employees)
 )
-SELECT D.DEPARTMENT_NAME, COUNT(*) AS HIGH_EARNER_COUNT
-FROM HIGH_EARNERS H
-JOIN HR.DEPARTMENTS D ON H.DEPARTMENT_ID = D.DEPARTMENT_ID
-GROUP BY D.DEPARTMENT_NAME
-ORDER BY HIGH_EARNER_COUNT DESC;
+SELECT d.department_name, COUNT(*) AS high_earner_count
+FROM HIGH_EARNERS h
+JOIN hr.departments d ON h.department_id = d.department_id
+GROUP BY d.department_name
+ORDER BY high_earner_count DESC;
 
--- Çoklu CTE
+-- Bu sorgu, çoklu CTE kullanarak yüksek maaşlı departmanlardaki çalışanları ve lokasyon bilgilerini listeler.
+-- 1. CTE: DEPT_STATS → departman bazında ortalama maaş ve çalışan sayısı
+-- 2. CTE: HIGH_SALARY_DEPTS → ortalama maaşı 8000’den fazla olan departmanlar
+-- 3. CTE: LOCATION_INFO → departmanların şehir ve ülke bilgileri
+-- Son sorgu: çalışanlar, yüksek maaşlı departmanlar ve lokasyon bilgileri birleştirilir.
 WITH 
 DEPT_STATS AS (
-    SELECT DEPARTMENT_ID, AVG(SALARY) AS AVG_SALARY, COUNT(*) AS EMP_COUNT
-    FROM HR.EMPLOYEES
-    GROUP BY DEPARTMENT_ID
+    SELECT department_id, AVG(salary) AS avg_salary, COUNT(*) AS emp_count
+    FROM hr.employees
+    GROUP BY department_id
 ),
 HIGH_SALARY_DEPTS AS (
-    SELECT DEPARTMENT_ID
+    SELECT department_id
     FROM DEPT_STATS
-    WHERE AVG_SALARY > 8000
+    WHERE avg_salary > 8000
 ),
 LOCATION_INFO AS (
-    SELECT D.DEPARTMENT_ID, D.DEPARTMENT_NAME, L.CITY, C.COUNTRY_NAME
-    FROM HR.DEPARTMENTS D
-    JOIN HR.LOCATIONS L ON D.LOCATION_ID = L.LOCATION_ID
-    JOIN HR.COUNTRIES C ON L.COUNTRY_ID = C.COUNTRY_ID
+    SELECT d.department_id, d.department_name, l.city, c.country_name
+    FROM hr.departments d
+    JOIN hr.locations l ON d.location_id = l.location_id
+    JOIN hr.countries c ON l.country_id = c.country_id
 )
-SELECT E.FIRST_NAME, E.LAST_NAME, E.SALARY, LI.DEPARTMENT_NAME, LI.CITY, LI.COUNTRY_NAME
-FROM HR.EMPLOYEES E
-JOIN HIGH_SALARY_DEPTS HSD ON E.DEPARTMENT_ID = HSD.DEPARTMENT_ID
-JOIN LOCATION_INFO LI ON E.DEPARTMENT_ID = LI.DEPARTMENT_ID
-ORDER BY E.SALARY DESC;
+SELECT e.first_name, e.last_name, e.salary, li.department_name, li.city, li.country_name
+FROM hr.employees e
+JOIN HIGH_SALARY_DEPTS hsd ON e.department_id = hsd.department_id
+JOIN LOCATION_INFO li ON e.department_id = li.department_id
+ORDER BY e.salary DESC;
 
 --------------- Analitik Fonksiyonlar (ROW_NUMBER, RANK) ---------------
--- Maaşa göre sıralama numarası ver
+
+-- Bu sorgu, çalışanlara maaşlarına göre sıra numarası verir.
+-- ROW_NUMBER() → her satıra benzersiz bir sıra numarası atar.
+-- ORDER BY salary DESC → en yüksek maaş en üstte olur.
 SELECT first_name, salary,
        ROW_NUMBER() OVER (ORDER BY salary DESC) AS row_num
 FROM hr.employees;
 
--- Aynı maaşlar için sıralama (RANK)
+-- Bu sorgu, aynı maaşa sahip çalışanlara aynı sıralama değerini verir.
+-- RANK() → eşit değerlere aynı sıralama numarasını verir, sonraki sıra atlanır.
 SELECT first_name, salary,
        RANK() OVER (ORDER BY salary DESC) AS salary_rank
 FROM hr.employees;
 
--- Departman içinde maaş sıralaması
+-- Bu sorgu, her departman içinde maaş sıralaması yapar.
+-- PARTITION BY department_id → her departman ayrı bir grup gibi değerlendirilir.
+-- RANK() → departman içindeki maaş sıralamasını verir.
 SELECT first_name, department_id, salary,
        RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS dept_rank
 FROM hr.employees;
 
---8. Maaş dağılımında üst %10'da olan çalışanları ve bunların özelliklerini analiz edin.
+-- Bu sorgu, maaş dağılımında en üst %10’luk dilimde yer alan çalışanları analiz eder.
+-- 1. CTE: SALARY_PERCENTILES → PERCENT_RANK ile maaş yüzdelik dilimi hesaplanır.
+-- 2. CTE: TOP_10_PERCENT → %10’dan yüksek olanlar filtrelenir.
+-- Son sorgu: çalışan bilgileri, departman, iş unvanı, şehir, ülke, deneyim süresi, komisyon durumu ve yönettiği kişi sayısı gösterilir.
 WITH SALARY_PERCENTILES AS (
-    SELECT EMPLOYEE_ID, FIRST_NAME, LAST_NAME, SALARY,
-           PERCENT_RANK() OVER (ORDER BY SALARY DESC) AS SALARY_PERCENTILE
-    FROM HR.EMPLOYEES
+    SELECT employee_id, first_name, last_name, salary,
+           PERCENT_RANK() OVER (ORDER BY salary DESC) AS salary_percentile
+    FROM hr.employees
 ),
 TOP_10_PERCENT AS (
-    SELECT * FROM SALARY_PERCENTILES WHERE SALARY_PERCENTILE <= 0.1
+    SELECT * FROM SALARY_PERCENTILES WHERE salary_percentile <= 0.1
 )
-SELECT T.FIRST_NAME, T.LAST_NAME, T.SALARY, D.DEPARTMENT_NAME, J.JOB_TITLE,
-       L.CITY, C.COUNTRY_NAME,
-       ROUND(MONTHS_BETWEEN(SYSDATE, E.HIRE_DATE)/12, 1) AS YEARS_EXPERIENCE,
-       CASE WHEN E.COMMISSION_PCT IS NOT NULL THEN 'Has Commission' ELSE 'No Commission' END AS COMMISSION_STATUS,
-       (SELECT COUNT(*) FROM HR.EMPLOYEES E2 WHERE E2.MANAGER_ID = E.EMPLOYEE_ID) AS DIRECT_REPORTS
-FROM TOP_10_PERCENT T
-JOIN HR.EMPLOYEES E ON T.EMPLOYEE_ID = E.EMPLOYEE_ID
-JOIN HR.DEPARTMENTS D ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
-JOIN HR.JOBS J ON E.JOB_ID = J.JOB_ID
-JOIN HR.LOCATIONS L ON D.LOCATION_ID = L.LOCATION_ID
-JOIN HR.COUNTRIES C ON L.COUNTRY_ID = C.COUNTRY_ID
-ORDER BY T.SALARY DESC;
+SELECT t.first_name, t.last_name, t.salary, d.department_name, j.job_title,
+       l.city, c.country_name,
+       ROUND(MONTHS_BETWEEN(SYSDATE, e.hire_date)/12, 1) AS years_experience,
+       CASE WHEN e.commission_pct IS NOT NULL THEN 'Has Commission' ELSE 'No Commission' END AS commission_status,
+       (SELECT COUNT(*) FROM hr.employees e2 WHERE e2.manager_id = e.employee_id) AS direct_reports
+FROM TOP_10_PERCENT t
+JOIN hr.employees e ON t.employee_id = e.employee_id
+JOIN hr.departments d ON e.department_id = d.department_id
+JOIN hr.jobs j ON e.job_id = j.job_id
+JOIN hr.locations l ON d.location_id = l.location_id
+JOIN hr.countries c ON l.country_id = c.country_id
+ORDER BY t.salary DESC;
+
 
 --------------- Oracle’a Özgü Fonksiyonlar (NVL, DECODE, DUAL, CONNECT BY) ---------------
--- nvl => oracle db ye özgü fonksiyon, null değerleri istediğimiz değerle değiştirmemize olanak sunar
-select first_name, nvl(commission_pct,0) as commissions
-from hr.employees
 
--- Komisyonu olmayanlara “0” değeri ver
+-- Bu sorgu, çalışanların komisyon bilgilerini gösterir.
+-- NVL fonksiyonu, NULL olan commission_pct değerlerini 0 ile değiştirir.
+-- Oracle’a özgü bir fonksiyondur, veri eksikliğini yönetmek için kullanılır.
+SELECT first_name, NVL(commission_pct, 0) AS commissions
+FROM hr.employees;
+
+-- Bu sorgu da aynı şekilde, komisyonu olmayanlara “0” değeri verir.
+-- NVL(commission_pct, 0) → NULL olanları 0 yapar.
 SELECT first_name, NVL(commission_pct, 0) AS commission
 FROM hr.employees;
 
--- nvl2
-select first_name, nvl2(commission_pct,'yes commission','no commission') as commission_status
-from hr.employees
+-- Bu sorgu, NVL2 fonksiyonu ile komisyon durumu hakkında metinsel bilgi verir.
+-- NVL2 → NULL değilse 'yes commission', NULL ise 'no commission' döner.
+SELECT first_name, NVL2(commission_pct, 'yes commission', 'no commission') AS commission_status
+FROM hr.employees;
 
--- İş tanımına göre rol belirle
+-- Bu sorgu, çalışanların iş tanımına göre rol belirler.
+-- DECODE → Oracle’a özgü koşullu dönüşüm fonksiyonudur.
+-- Belirli job_id değerlerine karşılık gelen metinler döner.
 SELECT job_id,
        DECODE(job_id, 'IT_PROG', 'Developer', 'AD_VP', 'Vice President', 'Other') AS role
 FROM hr.employees;
 
--- CONNECT BY ile hiyerarşi (yönetici → çalışan)
+-- Bu sorgu, CONNECT BY ile çalışan-yönetici hiyerarşisini gösterir.
+-- START WITH → en üst düzeyden (yönetici olmayan) başlar.
+-- CONNECT BY PRIOR → kendini yöneticisiyle bağlar.
+-- Oracle’ın hiyerarşik sorgular için sunduğu özel bir yapıdır.
 SELECT employee_id, first_name, manager_id
 FROM hr.employees
 START WITH manager_id IS NULL
